@@ -1,0 +1,79 @@
+<slk-section>
+    <h1>
+        <div>
+            <h1>{{section.title}}</h1>
+            <p>{{section.description}}</p>
+        </div>
+        <div>
+            <h1>{{section.names.title}}</h1>
+            <sl-datamap data={{section.people}} selector="{{person}}">
+                <img src="{{person.photo}}" alt="">
+                <h1>{{person.name}}</h1>
+            </sl-datamap>
+        </div>
+    </h1>
+</slk-section>
+
+<slk-previewdata>
+    {
+        "templateName": "Hero",
+        "author": "Regis NDIZIHIWE <https://github.com/regisrex>",
+        "email": "ndizihiweregis06@gmail.com",
+        "repo" : "https://github.com/regisrex/slabkit/templates/hero.html",
+        "section": {
+            "title": "Default hero",
+            "description": "some description",
+            "names": {
+                "title": "Names of people",
+                "people": [
+                    {
+                        "name": "string",
+                        "photo": "string"
+                    }
+                ]
+            }
+        }
+    }
+</slk-previewdata>
+<slk-dataschema>
+    {
+        {
+            title: Title,
+            placeholder : "Enter the title of the section",
+            type: "string",
+            selector : "title"
+        },
+         {
+            description: Description,
+            placeholder : "Enter the description of the section",
+            type: "string"
+            selector : "description"
+         },
+          {        
+                title: Title,
+                placeholder : "Enter the title of the section",
+                type: "string",
+                selector : "names.title"
+            },
+            {
+                title : Names,
+                type : "array",
+                selector : "names.people",
+                schema : {
+                    name : {
+                        title : Name,
+                        type : "string",
+                        placeholder : "Enter the name of the person",
+                        selector : "name"
+                    },
+                    photo : {
+                        title : Photo,
+                        type : "string",
+                        placeholder : "Enter the photo of the person",
+                        selector : "photo"
+                    }
+                }
+            }
+
+    }
+</slk-dataschema>
