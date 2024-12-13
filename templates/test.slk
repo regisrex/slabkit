@@ -7,10 +7,10 @@
         </div>
         <div>
             <h1>{{section.names.title}}</h1>
-            <sl-datamap data={{section.people}} selector="{{person}}">
+            <div data="section.people" selector="person">
                 <img src="{{person.photo}}" alt="">
                 <h1>{{person.name}}</h1>
-            </sl-datamap>
+            </div>
         </div>
     </div>
 </slk-section>

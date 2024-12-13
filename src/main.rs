@@ -3,6 +3,7 @@ use file_ops::compile_slk_contents;
 mod file_ops;
 mod logger;
 mod utils;
+mod parser;
 
 #[derive(Parser, Debug)]
 #[command(author = "Regis Rex https://github.com/regisrex", version = "0.0.1", about ="SlabKit, an html templating engine that is easy to use", long_about = None)]
