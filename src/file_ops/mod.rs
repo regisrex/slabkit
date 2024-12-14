@@ -1,11 +1,10 @@
-use clap::{};
+use crate::{logger::Logger, parser::Lexer};
 use regex::Regex;
 use serde_json::Value;
 use std::{
     fs::File,
     io::{BufReader, Read},
 };
-use crate::{logger::Logger, parser::{ Lexer, Node, Parser}};
 
 /*
    @param path: &str
@@ -38,21 +37,18 @@ pub fn get_file(path: &str) -> String {
 }
 
 fn replace_json_in_html_recursively(html: &str, json: &Value) -> String {
-
     println!("HTML: {:?}", html);
-    let  lexer = Lexer::new(html.to_string());
-    let mut parser = Parser::new(lexer);
+    let mut lexer = Lexer::new(html.to_string());
+    let tokens = lexer.tokenize();
+     let len = tokens.len();
 
-    let dom = parser.parse();  
-    // println!("{:?}", dom); 
-    // println!("{}",  match dom {
-    //     Node::Element(element) => element.children.len().to_string(),
-    //     Node::Text(text) => text,
-    // });
+     // printt those tokens
+        for i in 0..len {
+            println!("{:?}", tokens[i]);
+        }
 
     "".to_string()
 }
-
 
 pub fn compile_slk_contents(template: &String, data: &Option<String>) -> String {
     let slk_section: String = get_slk_section(template, "slk-section");

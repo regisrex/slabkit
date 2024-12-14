@@ -1,17 +1,32 @@
 pub struct InputReader {
     pub input: String,
     pub index: usize,
+    pub line: usize,
+    pub col: usize,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Token {
-    OpenTag(String),
-    CloseTag,
-    Text(String),
-    AttributeName(String),
-    AttributeValue(String),
-    Equals,
-    Slash,
+#[derive(Debug)]
+
+pub struct Token {
+    line: usize,
+    column: usize,
+    token: EToken,
+}
+
+#[derive(Debug)]
+pub enum EToken {
+    LESSTHAN,                 // "<"
+    GREATERTHAN,              // ">"
+    LESS_THAN_SLASH,          // "</"
+    PLACEHOLDER_START_SYMBOL, // "!{"
+    PLACEHOLDER_END_SYMBOL,   // "}!"
+    EQUAL_SYMBOL,             // "="
+    APOSTROPHE,               // "\'" | "\""
+    ATTRKEY(String),          // id | class
+    ATTRVALUE(String),        // "value"
+    TEXT(String),             // "Hello World"
+    CHAR(char),
+    DOT,
     EOF,
 }
 
@@ -30,12 +45,25 @@ pub enum Node {
 
 impl InputReader {
     pub fn new(input: String) -> Self {
-        Self { input, index: 0 }
+        Self {
+            input,
+            index: 0,
+            line: 1,
+            col: 1,
+        }
     }
 
     pub fn next_char(&mut self) -> Option<char> {
         let ch = self.input.chars().nth(self.index);
+        match ch {
+            Some('\n') => {
+                self.col = 0;
+                self.line += 1;
+            }
+            _ => {}
+        }
         self.index += 1;
+        self.col += 1;
         ch
     }
 
@@ -52,10 +80,12 @@ impl InputReader {
             }
         }
     }
-    pub fn prev_char(&mut self) -> Option<char> {
-        // Get the last character and move the cursor backwards
-        self.index = self.index.saturating_sub(1);
-        self.input[self.index..self.index + 1].chars().next()
+    pub fn token(&mut self, tokenType: EToken) -> Token {
+        Token {
+            column: self.col,
+            line: self.line,
+            token: tokenType,
+        }
     }
 }
 
@@ -69,162 +99,83 @@ impl Lexer {
             reader: InputReader::new(input),
         }
     }
-}
 
-impl Lexer {
-    pub fn peek_token(&mut self) -> Option<Token> {
-        let index = self.reader.index;
-        let token = self.next_token();
-        self.reader.index = index;
-        Some(token)
-    }
-    pub fn next_token(&mut self) -> Token {
-        self.reader.consume_whitespace(); // Skip any leading whitespace
+    pub fn tokenize(&mut self) -> Vec<Token> {
+        let mut tokens: Vec<Token> = vec![];
 
-        if let Some(ch) = self.reader.next_char() {
-            match ch {
-                '<' => {
-                    if let Some('/') = self.reader.peek_char() {
-                        self.reader.next_char(); // Consume '/'
-                        Token::CloseTag
-                    } else {
-                        Token::OpenTag(self.read_tag_name())
-                    }
-                }
-                '>' => Token::CloseTag, // End of a tag
-                '=' => Token::Equals,
-                '/' => Token::Slash,
-                '"' | '\'' => Token::AttributeValue(self.read_quoted_value(ch)),
-                '{' => Token::Text(self.read_text(ch)),
-                _ if ch.is_alphanumeric() => Token::Text(self.read_text(ch)),
-
-                _ => panic!("Unexpected character: {}", ch),
-            }
-        } else {
-            Token::EOF
-        }
-    }
-
-    fn read_tag_name(&mut self) -> String {
-        let mut tag_name = String::new();
-        while let Some(ch) = self.reader.peek_char() {
-            if ch.is_alphanumeric() || ch == '-' {
-                tag_name.push(ch);
-                self.reader.next_char();
-            } else {
+        loop {
+            let ch = self.reader.next_char();
+            if ch.is_none() {
                 break;
             }
-        }
-        tag_name
-    }
-
-    fn read_text(&mut self, first_char: char) -> String {
-        let mut text = String::new();
-        text.push(first_char);
-
-        while let Some(ch) = self.reader.peek_char() {
-            if ch == '<' {
-                break; // Stop reading when a tag starts
-            }
-            text.push(ch);
-            self.reader.next_char();
-        }
-        text
-    }
-
-    fn read_quoted_value(&mut self, quote: char) -> String {
-        let mut value = String::new();
-
-        while let Some(ch) = self.reader.next_char() {
-            if ch == quote {
-                break; // End of the quoted value
-            }
-            value.push(ch);
-        }
-
-        value
-    }
-}
-
-pub struct Parser {
-    lexer: Lexer,
-}
-
-impl Parser {
-    pub fn new(lexer: Lexer) -> Self {
-        Self { lexer }
-    }
-
-    pub fn parse(&mut self) -> Node {
-        self.parse_element()
-    }
-
-    fn parse_element(&mut self) -> Node {
-        let mut nesting_depth = 1;
-        if let Token::OpenTag(tag) = self.lexer.next_token() {
-            let mut children = Vec::new();
-
-            loop {
-                let token = self.lexer.next_token();
-                match token {
-                    Token::CloseTag => {
-                        nesting_depth -= 1;
-                        if nesting_depth == 0 {
+            match ch.unwrap() {
+                '<' => {
+                    let next_char = self.reader.peek_char();
+                    match next_char {
+                        Some('/') => {
+                            tokens.push(self.reader.token(EToken::LESS_THAN_SLASH));
+                            self.reader.next_char();
+                        }
+                        _ => tokens.push(self.reader.token(EToken::LESSTHAN)),
+                    }
+                }
+                '>' => tokens.push(self.reader.token(EToken::GREATERTHAN)),
+                '!' => {
+                    let next_char = self.reader.peek_char();
+                    match next_char {
+                        Some('{') => {
+                            self.reader.next_char();
+                            tokens.push(self.reader.token(EToken::PLACEHOLDER_START_SYMBOL));
+                        }
+                        _ => tokens.push(
+                            self.reader
+                                .token(EToken::TEXT(next_char.unwrap().to_string())),
+                        ),
+                    }
+                }
+                '}' => {
+                    let next_char = self.reader.peek_char();
+                    match next_char {
+                        Some('!') => {
+                            self.reader.next_char();
+                            tokens.push(self.reader.token(EToken::PLACEHOLDER_END_SYMBOL));
+                        }
+                        _ => tokens.push(
+                            self.reader
+                                .token(EToken::TEXT(next_char.unwrap().to_string())),
+                        ),
+                    }
+                }
+                '=' => tokens.push(self.reader.token(EToken::EQUAL_SYMBOL)),
+                '.' => tokens.push(self.reader.token(EToken::DOT)),
+                '\'' | '\"' => tokens.push(self.reader.token(EToken::APOSTROPHE)),
+                _ => {
+                    if ch.is_none() {
+                        break;
+                    }
+                    if ch.unwrap().is_whitespace() {
+                        self.reader.consume_whitespace();
+                        continue;
+                    }
+                    let mut char_sequence = String::from(ch.unwrap());
+                    loop {
+                        if let Some(next_char) = self.reader.peek_char() {
+                            if next_char.is_alphanumeric() || next_char == '-' {
+                                char_sequence.push(next_char);
+                                self.reader.next_char();
+                            } else {
+                                break;
+                            }
+                        } else {
                             break;
                         }
                     }
-                    Token::OpenTag(_) => {
-                        nesting_depth += 1;
-                        children.push(self.parse_child_element());
-                    }
-                    Token::Text(text) => children.push(Node::Text(text)),
-                    Token::EOF => panic!("Unexpected EOF"),
-                    _ => panic!("Unexpected token: {:?}", token),
+                    tokens.push(self.reader.token(EToken::TEXT(char_sequence)));
                 }
             }
-
-            let output_node = Node::Element(Elt { tag, children });
-            return output_node;
-        } else {
-            panic!("Expected a start tag");
         }
+
+        tokens
     }
 
-    fn parse_child_element(&mut self) -> Node {
-        let next_token = self.lexer.peek_token();
-
-        if next_token.is_some() && next_token.unwrap() == Token::OpenTag("".to_string()) {
-            return self.parse_element();
-        } else {
-            self.lexer.reader.index -= 1; // Rewind for the child element
-            return self.parse_element();
-        }
-    }
-    // fn parse_element(&mut self) -> Node {
-    //     println!("Peeking {:?}", self.lexer.next_token());
-    //     if let Token::OpenTag(tag) = self.lexer.next_token() {
-    //         let mut children = Vec::new();
-
-    //         loop {
-    //             let token = self.lexer.next_token();
-    //             match token {
-    //                 Token::CloseTag => break,
-    //                 Token::OpenTag(_) => {
-    //                     self.lexer.reader.index -= 1; // rewind
-    //                     children.push(self.parse_element());
-    //                 }
-    //                 Token::Text(text) => children.push(Node::Text(text)),
-    //                 Token::EOF => panic!("Unexpected EOF"),
-    //                 _ => panic!("Unexpected token: {:?}", token),
-    //             }
-    //         }
-
-    //         let output_node = Node::Element( Elt{ tag, children });
-
-    //         println!("Output node {:?} ", output_node);
-    //         output_node
-    //     } else {
-    //         panic!("Expected a start tag");
-    //     }
-    // }
 }
