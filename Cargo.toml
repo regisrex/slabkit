@@ -13,4 +13,5 @@ keywords = ["html template engine"]
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 regex = "1.11.1"
+serde = {version = "1.0.216"}
 serde_json = "1.0.133"

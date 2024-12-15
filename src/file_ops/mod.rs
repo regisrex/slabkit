@@ -1,4 +1,4 @@
-use crate::{logger::Logger, parser::Lexer};
+use crate::{lexer::Lexer, logger::Logger, parser::Parser};
 use regex::Regex;
 use serde_json::Value;
 use std::{
@@ -38,14 +38,16 @@ pub fn get_file(path: &str) -> String {
 
 fn replace_json_in_html_recursively(html: &str, json: &Value) -> String {
     println!("HTML: {:?}", html);
-    let mut lexer = Lexer::new(html.to_string());
-    let tokens = lexer.tokenize();
-     let len = tokens.len();
+    let mut parser = Parser::new(html.to_string());
+    for token in parser.tokens.iter() {
+        println!("{:?}", token);
+    }
 
-     // printt those tokens
-        for i in 0..len {
-            println!("{:?}", tokens[i]);
-        }
+
+    println!("============ PARSING ============");
+    let node = parser.parse();
+
+    // println!("Node after parsing: {:?}", node);
 
     "".to_string()
 }
