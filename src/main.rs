@@ -1,5 +1,7 @@
-use clap::Parser;
-use file_ops::compile_slk_contents;
+use evaluator::Evaluator;
+use parser::Parser;
+use clap::Parser as ClapParser;
+
 mod file_ops;
 mod logger;
 mod utils;
@@ -8,7 +10,7 @@ mod parser;
 mod  html;
 mod evaluator;
 
-#[derive(Parser, Debug)]
+#[derive(ClapParser, Debug)]
 #[command(author = "Regis Rex https://github.com/regisrex", version = "0.0.1", about ="SlabKit, an html templating engine that is easy to use", long_about = None)]
 pub struct Args {
     /// Action to perform on the template  ['dev', 'compile']
@@ -44,6 +46,19 @@ fn main() {
     let output = utils::get_outfile(&args.output);
     println!("Output: {}", output);
 
-    let final_data = compile_slk_contents(&template, &data);
-    println!("Final data: {}", final_data);
+
+    let parser_output_node = Parser::new(template).parse();
+    match parser_output_node {
+        Ok(node) => {
+            let json_value = file_ops::get_json_value_from_template(data.unwrap() );
+            let evaluated_node = Evaluator::new(json_value).evaluate(node);
+            println!("Evaluator: {:?}", evaluated_node);
+        },
+        Err(error) => {
+            println!("Slabkit error: {:?}", error)
+        }
+    }
+
+    // let final_data = compile_slk_contents(&template, &data);
+    // println!("Final data: {}", final_data);
 }

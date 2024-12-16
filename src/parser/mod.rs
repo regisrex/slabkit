@@ -1,7 +1,4 @@
 use std::collections::HashMap;
-use std::string;
-
-use regex::RegexSetBuilder;
 
 use crate::lexer::EToken;
 
@@ -13,11 +10,17 @@ pub enum Node {
     Text(String),         // Text node
 }
 
+impl Clone for Node {
+    fn clone(&self) -> Self {
+        self.clone()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct HtmlElement {
     pub tag: String,
-   pub attributes: HashMap<String, String>,
-   pub children: Vec<Node>,
+    pub attributes: HashMap<String, String>,
+    pub children: Vec<Node>,
 }
 
 #[derive(Debug, Clone)]
@@ -74,7 +77,6 @@ impl Parser {
                     }
                     _ => self.parse_block(),
                 };
-                println!("{:?}", result_node);
 
                 result_node
             }
@@ -116,14 +118,27 @@ impl Parser {
                     {
                         self.next_token();
 
-                        if let Some(Token {
+                        // if let Some(Token {
+                        //     token: EToken::TEXT(attr_value),
+                        //     ..
+                        // }) = self.current_token()
+                        // {
+                        //     attributes.insert(attr_name.clone(), attr_value.clone());
+                        //     self.next_token();
+                        // }
+
+                        let mut attr_full_value = String::new();
+
+                        while let Some(Token {
                             token: EToken::TEXT(attr_value),
                             ..
                         }) = self.current_token()
                         {
-                            attributes.insert(attr_name.clone(), attr_value.clone());
+                            attr_full_value += &format!(" {}",attr_value).to_string();
                             self.next_token();
                         }
+                        attributes.insert(attr_name.clone(), attr_full_value.clone());
+
                         self.expect_and_consume_token(EToken::APOSTROPHE)?;
                     } else {
                         return Err("Expected an attribute value".to_string());
@@ -165,12 +180,8 @@ impl Parser {
 
 #[cfg(test)]
 mod parser_tests {
-    use clap::parser;
 
-    use crate::{
-        lexer::{EToken, Lexer},
-        parser::Parser,
-    };
+    use crate::{lexer::EToken, parser::Parser};
 
     #[test]
     fn test_parser_utils() {
