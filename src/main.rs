@@ -6,7 +6,7 @@ mod utils;
 mod lexer;
 mod parser;
 mod  html;
-mod walker;
+mod evaluator;
 
 #[derive(Parser, Debug)]
 #[command(author = "Regis Rex https://github.com/regisrex", version = "0.0.1", about ="SlabKit, an html templating engine that is easy to use", long_about = None)]

@@ -67,11 +67,11 @@ impl EToken {
 
 pub struct Elt {
     pub tag: String,
-    pub children: Vec<Node>,
+    pub children: Vec<LexicNode>,
 }
 
 #[derive(Debug)]
-pub enum Node {
+pub enum LexicNode {
     Element(Elt),
     Text(String),
 }
