@@ -1,6 +1,12 @@
 ## Slabkit 
+A kind of template engine for reusable HTML
 
-A template engine for HTML
+#### Features
 
-### Docs
-!  Do not put styles or scripts inside `<slk-template>` tag
+- [x] Generating dom  
+- [x] Replacing templates with real values
+- [x] Form a filled html
+- [x] Data mapping
+- [ ] Conditional rendering
+- [ ] Input generation.
+- [ ] Including other files 
