@@ -1,3 +1,4 @@
+use core::slice;
 use std::collections::HashMap;
 
 use crate::lexer::EToken;
@@ -10,11 +11,36 @@ pub enum Node {
     Text(String),         // Text node
 }
 
-impl Node  {
+impl Node {
     pub fn a_string(&self) -> String {
         match self {
             Node::Element(elt) => elt.tag.clone(),
-            Node::Text(t) => t.to_string()
+            Node::Text(t) => t.to_string(),
+        }
+    }
+
+    pub fn node_to_html(&self) -> String {
+        match self {
+            Node::Text(text) => text.clone(),
+            Node::Element(element) => {
+                let mut attributes = String::new();
+                for (key, value) in &element.attributes {
+                    attributes.push_str(&format!(r#" {}="{}""#, key, value));
+                }
+
+                if element.children.is_empty() {
+                    format!(r#"<{}{} />"#, element.tag, attributes)
+                } else {
+                    let mut children_html = String::new();
+                    for child in &element.children {
+                        children_html.push_str(&child.clone().node_to_html());
+                    }
+                    format!(
+                        r#"<{}{}>{}</{}>"#,
+                        element.tag, attributes, children_html, element.tag
+                    )
+                }
+            }
         }
     }
 }
@@ -22,7 +48,7 @@ impl Clone for Node {
     fn clone(&self) -> Self {
         match self {
             Node::Element(elt) => Node::Element(elt.clone()),
-            Node::Text(t) => Node::Text(t.clone())
+            Node::Text(t) => Node::Text(t.clone()),
         }
     }
 }
@@ -39,7 +65,7 @@ impl Clone for HtmlElement {
         HtmlElement {
             tag: self.tag.clone(),
             attributes: self.attributes.clone(),
-            children: self.children.clone()
+            children: self.children.clone(),
         }
     }
 }
@@ -154,7 +180,7 @@ impl Parser {
                             ..
                         }) = self.current_token()
                         {
-                            attr_full_value += &format!(" {}",attr_value).to_string();
+                            attr_full_value += &format!(" {}", attr_value).to_string();
                             self.next_token();
                         }
                         attributes.insert(attr_name.clone(), attr_full_value.clone());

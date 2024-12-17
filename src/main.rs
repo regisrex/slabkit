@@ -44,16 +44,18 @@ fn main() {
     let output = utils::get_outfile(&args.output);
 
     let parser_output_node = Parser::new(template).parse();
+
     match parser_output_node {
         Ok(node) => {
             let json_value = file_ops::get_json_value_from_template(data.unwrap() );
             let evaluated_node = Evaluator::new(json_value).evaluate(node);
+
+            println!("Final html: {}", evaluated_node.node_to_html());
+
         },
         Err(error) => {
             panic!("Slabkit error: {:?}", error)
         }
     }
 
-    // let final_data = compile_slk_contents(&template, &data);
-    // println!("Final data: {}", final_data);
 }
