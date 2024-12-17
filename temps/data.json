@@ -1,0 +1,28 @@
+{
+    "templateName": "Hero",
+    "author": "Regis NDIZIHIWE <https: //github.com/regisrex>",
+    "email": "ndizihiweregis06@gmail.com",
+    "repo": "https://github.com/regisrex/slabkit/templates/hero.html",
+    "fontFamily": "Arial",
+    "person": {
+        "name": "Regis NDIZIHIWE",
+        "photo": "https://github.com/regisrex.png"
+    },
+    "section": {
+        "title": "Default hero",
+        "description": "some description",
+        "people": {
+            "title": "Names of people",
+            "people": [
+                {
+                    "name": "regisrex",
+                    "photo": "https://github.com/regisrex"
+                },
+                {
+                    "name": "jackson",
+                    "photo": "https://jack.com"
+                }
+            ]
+        }
+    }
+}

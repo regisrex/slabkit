@@ -5,87 +5,86 @@
             <span>!{section.title}!</span>
             name quick brown fox jumps
          </h1>
-         <img src="!{person.photo}!" style="font-family:!{section.fontFamily}!;" alt="Empty"> </img>
+         <br> </br>
+         <img src="!{person.photo}!" style="font-family:!{fontFamily}!;" alt="Empty"> </img>
          <p>!{section.description}!</p>
-         </div>
-         <div>
-            <h1>!{section.names.title}!</h1>
-         <slk-datamap data="!{section.people}!" selector="!{person}!">
+      </div>
+      <div>
+         <h1>!{section.names.title}!</h1>
+         <slk-datamap data="!{section.people.people}!" selector="!{person}!" class="text-xl w-4">
             <h1>!{person.name}!</h1>
          </slk-datamap>
-         </div>
+      </div>
    </section>
-
-   <style>
-      </slk-section><slk-previewdata> {
-   
-         "templateName":"Hero",
-         "author":"Regis NDIZIHIWE <https: //github.com/regisrex>",
-         "email":"ndizihiweregis06@gmail.com",
-         "repo":"https://github.com/regisrex/slabkit/templates/hero.html",
-         "section": {
-
-            "title":"Default hero",
-            "description":"some description",
-            "people": {
-
-               "title":"Names of people",
-               "people":[ {
-                  "name": "string",
-                     "photo":"string"
-               }
-
-               ]
-            }
-         }
-      }
-
-      </slk-previewdata><slk-dataschema> {
+</slk-section>
+<slk-previewdata>
+   {
+   "templateName":"Hero",
+   "author":"Regis NDIZIHIWE <https: //github.com/regisrex>",
+      "email":"ndizihiweregis06@gmail.com",
+      "repo":"https://github.com/regisrex/slabkit/templates/hero.html",
+      "section":{
+      "title":"Default hero",
+      "description":"some description",
+         "people":{
+         "title":"Names of people",
+            "people":[
             {
-            "title": "Title",
-               "placeholder":"Enter the title of the section",
-               "type":"string",
-               "selector":"title"
-         }
+            "name":"string",
+            "photo":"string"
+               }
+            ]
+            }
+            }
+            }
 
-         ,
-         {
-         "description": "Description",
-            "placeholder":"Enter the description of the section",
-            "type":"string" "selector":"description"
-      }
+</slk-previewdata>
+<slk-dataschema> {
+   {
+   "title": "Title",
+   "placeholder":"Enter the title of the section",
+   "type":"string",
+   "selector":"title"
+   }
 
-      ,
-      {
-      "title": "Title",
-         "placeholder":"Enter the title of the section",
-         "type":"string",
-         "selector":"names.title"
-      }
+   ,
+   {
+   "description": "Description",
+   "placeholder":"Enter the description of the section",
+   "type":"string" "selector":"description"
+   }
 
-      ,
-      {
+   ,
+   {
+   "title": "Title",
+   "placeholder":"Enter the title of the section",
+   "type":"string",
+   "selector":"names.title"
+   }
 
-      "title":"Names",
-      "type":"array",
-      "selector":"names.people",
-      "schema": {
-         "name": {
-            "title": "Name",
-               "type":"string",
-               "placeholder":"Enter the name of the person",
-               "selector":"name"
-         }
+   ,
+   {
 
-         ,
-         "photo": {
-            "title": "Photo",
-               "type":"string",
-               "placeholder":"Enter the photo of the person",
-               "selector":"photo"
-         }
-      }
-      }
-      }
+   "title":"Names",
+   "type":"array",
+   "selector":"names.people",
+   "schema": {
+   "name": {
+   "title": "Name",
+   "type":"string",
+   "placeholder":"Enter the name of the person",
+   "selector":"name"
+   }
 
-      </slk-dataschema>
+   ,
+   "photo": {
+   "title": "Photo",
+   "type":"string",
+   "placeholder":"Enter the photo of the person",
+   "selector":"photo"
+   }
+   }
+   }
+   }
+
+</slk-dataschema>

@@ -32,11 +32,9 @@ pub struct Args {
 }
 
 fn main() {
-    println!("Hello, world!");
     let args = Args::parse();
 
     let action = utils::get_action(&args.action);
-    println!("Action: {}", action);
 
     let template = utils::get_template(&args.template);
     // println!("Template: {}", template);
@@ -44,18 +42,15 @@ fn main() {
     let data = utils::get_data(&args.data);
 
     let output = utils::get_outfile(&args.output);
-    println!("Output: {}", output);
-
 
     let parser_output_node = Parser::new(template).parse();
     match parser_output_node {
         Ok(node) => {
             let json_value = file_ops::get_json_value_from_template(data.unwrap() );
             let evaluated_node = Evaluator::new(json_value).evaluate(node);
-            println!("Evaluator: {:?}", evaluated_node);
         },
         Err(error) => {
-            println!("Slabkit error: {:?}", error)
+            panic!("Slabkit error: {:?}", error)
         }
     }
 

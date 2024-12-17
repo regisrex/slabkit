@@ -10,9 +10,20 @@ pub enum Node {
     Text(String),         // Text node
 }
 
+impl Node  {
+    pub fn a_string(&self) -> String {
+        match self {
+            Node::Element(elt) => elt.tag.clone(),
+            Node::Text(t) => t.to_string()
+        }
+    }
+}
 impl Clone for Node {
     fn clone(&self) -> Self {
-        self.clone()
+        match self {
+            Node::Element(elt) => Node::Element(elt.clone()),
+            Node::Text(t) => Node::Text(t.clone())
+        }
     }
 }
 
@@ -20,9 +31,18 @@ impl Clone for Node {
 pub struct HtmlElement {
     pub tag: String,
     pub attributes: HashMap<String, String>,
-    pub children: Vec<Node>,
+    pub children: Vec<Box<Node>>,
 }
 
+impl Clone for HtmlElement {
+    fn clone(&self) -> Self {
+        HtmlElement {
+            tag: self.tag.clone(),
+            attributes: self.attributes.clone(),
+            children: self.children.clone()
+        }
+    }
+}
 #[derive(Debug, Clone)]
 pub struct Parser {
     pub tokens: Vec<Token>,
@@ -169,7 +189,7 @@ impl Parser {
                 }
                 _ => {
                     // Parse a child node (could be text or another element)
-                    children.push(self.parse()?);
+                    children.push(Box::new(self.parse()?));
                 }
             }
         }

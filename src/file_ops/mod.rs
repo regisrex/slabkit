@@ -1,4 +1,4 @@
-use crate::{lexer::Lexer, logger::Logger, parser::Parser};
+use crate::{logger::Logger, parser::Parser};
 use regex::Regex;
 use serde_json::Value;
 use std::{
@@ -36,35 +36,9 @@ pub fn get_file(path: &str) -> String {
     }
 }
 
-fn replace_json_in_html_recursively(html: &str, json: &Value) -> String {
-    println!("HTML: {:?}", html);
-    let mut parser = Parser::new(html.to_string());
-    for token in parser.tokens.iter() {
-        println!("{:?}", token);
-    }
 
 
-    println!("============ PARSING ============");
-    let node = parser.parse();
-
-    // println!("Node after parsing: {:?}", node);
-
-    "".to_string()
-}
-
-pub fn compile_slk_contents(template: &String, data: &Option<String>) -> String {
-    let slk_section: String = get_slk_section(template, "slk-section");
-    let slk_json_data = match data {
-        Some(data) => data,
-        None => &get_slk_section(template, "slk-previewdata"),
-    };
-
-    let json_data: Value = serde_json::from_str(slk_json_data).unwrap();
-    let compiled = replace_json_in_html_recursively(&slk_section, &json_data);
-    compiled
-}
-
-pub fn get_slk_section(template: &str, section: &str) -> String {
+pub fn get_slk_section(template: &str, section: &str) -> Result<String, String> {
     // Construct regex dynamically with dot-all flag to handle multiline
     let matching_string = format!(r"(?s)<{section}>(.*?)</{section}>", section = section);
     println!("Matching string: {:?}", matching_string);
@@ -74,10 +48,21 @@ pub fn get_slk_section(template: &str, section: &str) -> String {
     // Check for captures and return matched content
     if let Some(cap) = re.captures(template) {
         if let Some(matched_section) = cap.get(1) {
-            return matched_section.as_str().to_string();
+            return Ok(matched_section.as_str().to_string())
         }
     }
 
     println!("No matching section found for <{}>", section);
-    String::new()
+    Err(format!("Slabkit error: couldn't resolve section {} from the provided template", template))
+}
+
+pub fn get_json_value_from_template(json: String) -> Value {
+    let json_value = serde_json::from_str(&json);
+    match json_value {
+        Ok(value) => value,
+        Err(_) => {
+            println!("Slabkit error: Couldn't parse json data");
+            Value::Null
+        }
+    }
 }
