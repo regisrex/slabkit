@@ -203,7 +203,6 @@ impl Lexer {
                             if next_char.is_alphanumeric()
                                 || ['}', '!', '{', '@', '-', '_', ':', '.', '&', ';', ',']
                                     .contains(&next_char)
-                            // || next_char.is_whitespace()
                             {
                                 char_sequence.push(next_char);
                                 self.reader.next_char();

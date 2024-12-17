@@ -1,14 +1,15 @@
+use clap::Parser as ClapParser;
 use evaluator::Evaluator;
 use parser::Parser;
-use clap::Parser as ClapParser;
+use warp::Filter;
 
-mod file_ops;
-mod logger;
-mod utils;
-mod lexer;
-mod parser;
-mod  html;
 mod evaluator;
+mod file_ops;
+mod html;
+mod lexer;
+mod logger;
+mod parser;
+mod utils;
 
 #[derive(ClapParser, Debug)]
 #[command(author = "Regis Rex https://github.com/regisrex", version = "0.0.1", about ="SlabKit, an html templating engine that is easy to use", long_about = None)]
@@ -31,7 +32,8 @@ pub struct Args {
     data: Option<String>,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Args::parse();
 
     let action = utils::get_action(&args.action);
@@ -47,15 +49,18 @@ fn main() {
 
     match parser_output_node {
         Ok(node) => {
-            let json_value = file_ops::get_json_value_from_template(data.unwrap() );
+            let json_value = file_ops::get_json_value_from_template(data.unwrap());
             let evaluated_node = Evaluator::new(json_value).evaluate(node);
 
-            println!("Final html: {}", evaluated_node.node_to_html());
+            // Define a warp filter that serves the HTML
+            let html_route = warp::path::end().map(move || warp::reply::html(evaluated_node.node_to_html().clone()));
 
-        },
+            // Start the warp server
+            println!("Server running at http://localhost:3030");
+            warp::serve(html_route).run(([127, 0, 0, 1], 3030)).await;
+        }
         Err(error) => {
             panic!("Slabkit error: {:?}", error)
         }
     }
-
 }

@@ -14,7 +14,7 @@ impl Evaluator {
     }
     pub fn evaluate(&mut self, node: Node) -> Node {
         let mut evaluated_node = match node {
-            Node::Text(text) => Node::Text(self.replace_placeholders(text)),
+            Node::Text(text) => Node::Text(self.replace_placeholders(text + " ")),
             Node::Element(mut elt) => {
                 if elt.tag == "slk-datamap" {
                     return self.process_datamap(elt);
